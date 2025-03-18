@@ -50,27 +50,27 @@ const menuItems = [
   {
     label: "Opening of bids",
     icon: Plus,
-    url: "/open-bids",
+    url: "#/open-bids",
   },
   {
     label: "Bid evaluation",
     icon: Plus,
-    url: "/bid-evaluation",
+    url: "#/bid-evaluation",
   },
   {
     label: "Contract signing",
     icon: Plus,
-    url: "/contract-signing",
+    url: "#/contract-signing",
   },
   {
     label: "Contract management",
     icon: Plus,
-    url: "/contract-signing",
+    url: "#/contract-signing",
   },
   {
     label: "Invoice",
     icon: Plus,
-    url: "/invoice",
+    url: "#/invoice",
   }
 ]
 
