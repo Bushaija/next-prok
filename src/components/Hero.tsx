@@ -27,17 +27,6 @@ const Hero: React.FC = () => {
                     {/* <AppStoreButton dark />
                     <PlayStoreButton dark /> */}
                 </div>
-                {/* <Image
-                    src={heroDetails.centerImageSrc}
-                    width={384}
-                    height={340}
-                    quality={100}
-                    sizes="(max-width: 768px) 100vw, 384px"
-                    priority={true}
-                    unoptimized={true}
-                    alt="app mockup"
-                    className='relative mt-12 md:mt-16 mx-auto z-10'
-                /> */}
             </div>
         </section>
     );

@@ -45,39 +45,39 @@ const menuItems = [
   {
     label: "Publication of tender",
     icon: Plus,
-    url: "/publication-tender",
+    url: "/publicationTender",
   },
   {
     label: "Opening of bids",
     icon: Plus,
-    url: "#/open-bids",
+    url: "/openBid",
   },
   {
     label: "Bid evaluation",
     icon: Plus,
-    url: "#/bid-evaluation",
+    url: "/bidEvaluation",
   },
   {
     label: "Contract signing",
     icon: Plus,
-    url: "#/contract-signing",
+    url: "/contractSigning",
   },
   {
     label: "Contract management",
     icon: Plus,
-    url: "#/contract-signing",
+    url: "/contractManagement",
   },
   {
     label: "Invoice",
     icon: Plus,
-    url: "#/invoice",
+    url: "/invoice",
   }
 ]
 
 export const Menu: React.FC = () => {
   return (
     <>
-      <DropdownMenu>
+      {/* <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="outline">Choose a procurement portal</Button>
       </DropdownMenuTrigger>
@@ -103,8 +103,10 @@ export const Menu: React.FC = () => {
         <DropdownMenuSeparator />
 
       </DropdownMenuContent>
-    </DropdownMenu> 
-    <Link href="/new/identification" className="mt-4 text-sm underline">Start a new procurement process</Link>
+    </DropdownMenu>  */}
+    <Button variant="outline" className="p-3 px-4">
+      <Link href="/list" >Start a new procurement process</Link>
+    </Button>
     </>
   );
 };

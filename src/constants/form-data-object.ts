@@ -307,12 +307,19 @@ export const IdentificationFormFields: FormField[] = [
       required: false,
     },
     {
-      name: "dateOfOpeningBids",
+      name: "bidOpeningDate",
       title: "Date of Opening Bids",
       type: "date",
       placeholder: "Select bid opening date",
       required: true,
     },
+    {
+      name: "publicationTenderId",
+      title: "Publication Tender ID",
+      type: "number",
+      placeholder: "Enter publication tender ID",
+      required: false,
+    }
   ];
 
   export const bidEvaluationFormFields = [
@@ -610,60 +617,53 @@ export const IdentificationFormFields: FormField[] = [
       required: true,
     },
   ];
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-
-  
 
 // Form type mapping
-export type FormType = 
-  | 'identification'
-  | 'planning'
-  | 'publication'
-  | 'publicationTender'
-  | 'openingBids'
-  | 'bidEvaluation'
-  | 'contractSigning'
-  | 'contractManagement'
-  | 'invoice';
+export type FormType = "identification" | "planning" | "publication" | "publicationTender" | "openBid" | "bidEvaluation" | "contractSigning" | "contractManagement" | "invoice";
 
-// Function to get form fields by type
-export const getFormFieldsByType = (formType: FormType): FormField[] => {
-  const formFieldsMap: Record<FormType, any> = {
-    identification: IdentificationFormFields,
-    planning: planningFormFields as unknown as FormField[],
-    publication: publicationFormFields as unknown as FormField[],
-    publicationTender: publicationTenderFormFields as unknown as FormField[],
-    openingBids: openingBidsFormFields as unknown as FormField[],
-    bidEvaluation: bidEvaluationFormFields as unknown as FormField[],
-    contractSigning: contractSigningFormFields as unknown as FormField[],
-    contractManagement: contractManagementFormFields as unknown as FormField[],
-    invoice: invoiceFormFields as unknown as FormField[]
-  };
-
-  return formFieldsMap[formType] || [];
+// Form fields by type mapping
+export const formFieldsByType: Record<FormType, FormField[]> = {
+  identification: IdentificationFormFields,
+  planning: planningFormFields as unknown as FormField[],
+  publication: publicationFormFields as unknown as FormField[],
+  publicationTender: publicationTenderFormFields as unknown as FormField[],
+  openBid: openingBidsFormFields as unknown as FormField[],
+  
+  bidEvaluation: bidEvaluationFormFields as unknown as FormField[],
+  contractSigning: contractSigningFormFields as unknown as FormField[],
+  contractManagement: contractManagementFormFields as unknown as FormField[],
+  invoice: invoiceFormFields as unknown as FormField[],
 };
 
 // Form titles mapping
 export const formTitles: Record<FormType, string> = {
-  identification: "Identification Form",
-  planning: "Planning Form",
-  publication: "Publication Form",
-  publicationTender: "Publication Tender Form",
-  openingBids: "Opening Bids Form",
-  bidEvaluation: "Bid Evaluation Form",
-  contractSigning: "Contract Signing Form",
-  contractManagement: "Contract Management Form",
-  invoice: "Invoice Form"
+  identification: "Identification",
+  planning: "Planning",
+  publication: "Publication",
+  publicationTender: "Publication Tender",
+  openBid: "Opening Bids",
+  bidEvaluation: "Bid Evaluation",
+  contractSigning: "Contract Signing",
+  contractManagement: "Contract Management",
+  invoice: "Invoice",
+};
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+
+  
+
+// Function to get form fields by type
+export const getFormFieldsByType = (formType: FormType): FormField[] => {
+  return formFieldsByType[formType] || [];
 };
   
   

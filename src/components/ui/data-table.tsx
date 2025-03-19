@@ -11,7 +11,7 @@ import {
   ColumnFiltersState,
   getFilteredRowModel,
 } from "@tanstack/react-table"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 
 import {
   Table,
@@ -29,6 +29,9 @@ interface DataTableProps<TData, TValue> {
   data: TData[]
   searchKey?: string
   searchPlaceholder?: string
+  topContent?: React.ReactNode
+  searchValue?: string
+  pageSize?: number
 }
 
 export function DataTable<TData, TValue>({
@@ -36,6 +39,9 @@ export function DataTable<TData, TValue>({
   data,
   searchKey,
   searchPlaceholder = "Search...",
+  topContent,
+  searchValue,
+  pageSize = 10,
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = useState<SortingState>([])
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
@@ -53,11 +59,25 @@ export function DataTable<TData, TValue>({
       sorting,
       columnFilters,
     },
+    initialState: {
+      pagination: {
+        pageSize,
+      },
+    },
   })
+
+  // Update the filter when the external searchValue changes
+  useEffect(() => {
+    if (searchKey && searchValue !== undefined) {
+      table.getColumn(searchKey)?.setFilterValue(searchValue);
+    }
+  }, [searchValue, searchKey, table]);
 
   return (
     <div>
-      {searchKey && (
+      {topContent}
+      
+      {searchKey && !topContent && (
         <div className="flex items-center py-4">
           <Input
             placeholder={searchPlaceholder}
@@ -69,6 +89,7 @@ export function DataTable<TData, TValue>({
           />
         </div>
       )}
+      
       <div className="rounded-md border">
         <Table>
           <TableHeader>
@@ -113,23 +134,35 @@ export function DataTable<TData, TValue>({
           </TableBody>
         </Table>
       </div>
-      <div className="flex items-center justify-end space-x-2 py-4">
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => table.previousPage()}
-          disabled={!table.getCanPreviousPage()}
-        >
-          Previous
-        </Button>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => table.nextPage()}
-          disabled={!table.getCanNextPage()}
-        >
-          Next
-        </Button>
+      <div className="flex items-center justify-between py-4">
+        <div className="flex-1 text-sm text-muted-foreground">
+          Showing {table.getRowModel().rows.length === 0 
+            ? '0' 
+            : ((table.getState().pagination.pageIndex * table.getState().pagination.pageSize) + 1)
+          }-
+          {Math.min(
+            (table.getState().pagination.pageIndex + 1) * table.getState().pagination.pageSize,
+            table.getFilteredRowModel().rows.length
+          )} of {table.getFilteredRowModel().rows.length} entries
+        </div>
+        <div className="flex items-center space-x-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => table.previousPage()}
+            disabled={!table.getCanPreviousPage()}
+          >
+            Previous
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => table.nextPage()}
+            disabled={!table.getCanNextPage()}
+          >
+            Next
+          </Button>
+        </div>
       </div>
     </div>
   )
