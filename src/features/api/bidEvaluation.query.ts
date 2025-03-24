@@ -15,7 +15,14 @@ const fetchBidEvaluations = async (): Promise<BidEvaluation[]> => {
 };
 
 const fetchBidEvaluationById = async (id: number): Promise<BidEvaluation> => {
-  const response = await fetch(`/api/bid-evaluations?id=${id}`);
+  // Special case for placeholder IDs
+  if (id < 0) {
+    // Return empty data or throw a controlled error
+    throw new Error('Invalid bid evaluation ID');
+  }
+  
+  // Use the dynamic route format for valid IDs
+  const response = await fetch(`/api/bid-evaluations/${id}`);
   if (!response.ok) {
     throw new Error('Failed to fetch bid evaluation');
   }
@@ -72,10 +79,14 @@ const createBidEvaluation = async (data: NewBidEvaluation): Promise<BidEvaluatio
   return response.json();
 };
 
-const updateBidEvaluation = async (
-  { id, data }: { id: number; data: UpdateBidEvaluation }
-): Promise<BidEvaluation> => {
-  const response = await fetch(`/api/bid-evaluations?id=${id}`, {
+const updateBidEvaluation = async ({ 
+  id, 
+  data 
+}: { 
+  id: number; 
+  data: UpdateBidEvaluation;
+}): Promise<BidEvaluation> => {
+  const response = await fetch(`/api/bid-evaluations/${id}`, {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json',
@@ -92,7 +103,7 @@ const updateBidEvaluation = async (
 };
 
 const deleteBidEvaluation = async (id: number): Promise<{ success: boolean }> => {
-  const response = await fetch(`/api/bid-evaluations?id=${id}`, {
+  const response = await fetch(`/api/bid-evaluations/${id}`, {
     method: 'DELETE',
   });
   
@@ -116,7 +127,7 @@ export const useBidEvaluation = (id: number) => {
   return useQuery<BidEvaluation, Error>({
     queryKey: ['bidEvaluation', id],
     queryFn: () => fetchBidEvaluationById(id),
-    enabled: !!id, // Only run query if ID is provided
+    enabled: !!id && id > 0, // Only run query if ID is valid (positive)
   });
 };
 

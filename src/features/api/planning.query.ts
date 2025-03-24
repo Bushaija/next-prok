@@ -16,7 +16,14 @@ const fetchPlannings = async (): Promise<Planning[]> => {
 };
 
 const fetchPlanningById = async (id: number): Promise<Planning> => {
-  const response = await fetch(`/api/plannings?id=${id}`);
+  // Special case for placeholder IDs
+  if (id < 0) {
+    // Return empty data or throw a controlled error
+    throw new Error('Invalid planning ID');
+  }
+  
+  // Use the dynamic route format for valid IDs
+  const response = await fetch(`/api/plannings/${id}`);
   if (!response.ok) {
     throw new Error('Failed to fetch planning');
   }
@@ -47,7 +54,7 @@ const updatePlanning = async ({
   id: number; 
   data: UpdatePlanning;
 }): Promise<Planning> => {
-  const response = await fetch(`/api/plannings?id=${id}`, {
+  const response = await fetch(`/api/plannings/${id}`, {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json',
@@ -64,7 +71,7 @@ const updatePlanning = async ({
 };
 
 const deletePlanning = async (id: number): Promise<{ success: boolean }> => {
-  const response = await fetch(`/api/plannings?id=${id}`, {
+  const response = await fetch(`/api/plannings/${id}`, {
     method: 'DELETE',
   });
   
@@ -125,7 +132,7 @@ export const usePlanning = (id: number) => {
   return useQuery<Planning, Error>({
     queryKey: ['planning', id],
     queryFn: () => fetchPlanningById(id),
-    enabled: !!id, // Only run the query if id is provided
+    enabled: !!id && id > 0, // Only run the query if id is valid (positive)
   });
 };
 

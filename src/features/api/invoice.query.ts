@@ -15,7 +15,14 @@ const fetchInvoices = async (): Promise<Invoice[]> => {
 };
 
 const fetchInvoiceById = async (id: number): Promise<Invoice> => {
-  const response = await fetch(`/api/invoices?id=${id}`);
+  // Special case for placeholder IDs
+  if (id < 0) {
+    // Return empty data or throw a controlled error
+    throw new Error('Invalid invoice ID');
+  }
+  
+  // Use the dynamic route format for valid IDs
+  const response = await fetch(`/api/invoices/${id}`);
   if (!response.ok) {
     throw new Error('Failed to fetch invoice');
   }
@@ -72,10 +79,14 @@ const createInvoice = async (data: NewInvoice): Promise<Invoice> => {
   return response.json();
 };
 
-const updateInvoice = async (
-  { id, data }: { id: number; data: UpdateInvoice }
-): Promise<Invoice> => {
-  const response = await fetch(`/api/invoices?id=${id}`, {
+const updateInvoice = async ({ 
+  id, 
+  data 
+}: { 
+  id: number; 
+  data: UpdateInvoice;
+}): Promise<Invoice> => {
+  const response = await fetch(`/api/invoices/${id}`, {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json',
@@ -92,7 +103,7 @@ const updateInvoice = async (
 };
 
 const deleteInvoice = async (id: number): Promise<{ success: boolean }> => {
-  const response = await fetch(`/api/invoices?id=${id}`, {
+  const response = await fetch(`/api/invoices/${id}`, {
     method: 'DELETE',
   });
   
@@ -116,7 +127,7 @@ export const useInvoice = (id: number) => {
   return useQuery<Invoice, Error>({
     queryKey: ['invoice', id],
     queryFn: () => fetchInvoiceById(id),
-    enabled: !!id, // Only run query if ID is provided
+    enabled: !!id && id > 0, // Only run query if ID is valid (positive)
   });
 };
 

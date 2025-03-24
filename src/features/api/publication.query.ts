@@ -16,7 +16,14 @@ const fetchPublications = async (): Promise<Publication[]> => {
 };
 
 const fetchPublicationById = async (id: number): Promise<Publication> => {
-  const response = await fetch(`/api/publications?id=${id}`);
+  // Special case for placeholder IDs
+  if (id < 0) {
+    // Return empty data or throw a controlled error
+    throw new Error('Invalid publication ID');
+  }
+  
+  // Use the dynamic route format for valid IDs
+  const response = await fetch(`/api/publications/${id}`);
   if (!response.ok) {
     throw new Error('Failed to fetch publication');
   }
@@ -47,7 +54,7 @@ const updatePublication = async ({
   id: number; 
   data: UpdatePublication;
 }): Promise<Publication> => {
-  const response = await fetch(`/api/publications?id=${id}`, {
+  const response = await fetch(`/api/publications/${id}`, {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json',
@@ -64,7 +71,7 @@ const updatePublication = async ({
 };
 
 const deletePublication = async (id: number): Promise<{ success: boolean }> => {
-  const response = await fetch(`/api/publications?id=${id}`, {
+  const response = await fetch(`/api/publications/${id}`, {
     method: 'DELETE',
   });
   
@@ -125,7 +132,7 @@ export const usePublication = (id: number) => {
   return useQuery<Publication, Error>({
     queryKey: ['publication', id],
     queryFn: () => fetchPublicationById(id),
-    enabled: !!id, // Only run the query if id is provided
+    enabled: !!id && id > 0, // Only run the query if id is valid (positive)
   });
 };
 

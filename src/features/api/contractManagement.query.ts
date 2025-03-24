@@ -15,7 +15,14 @@ const fetchContractManagements = async (): Promise<ContractManagement[]> => {
 };
 
 const fetchContractManagementById = async (id: number): Promise<ContractManagement> => {
-  const response = await fetch(`/api/contract-managements?id=${id}`);
+  // Special case for placeholder IDs
+  if (id < 0) {
+    // Return empty data or throw a controlled error
+    throw new Error('Invalid contract management ID');
+  }
+  
+  // Use the dynamic route format for valid IDs
+  const response = await fetch(`/api/contract-managements/${id}`);
   if (!response.ok) {
     throw new Error('Failed to fetch contract management');
   }
@@ -72,10 +79,14 @@ const createContractManagement = async (data: NewContractManagement): Promise<Co
   return response.json();
 };
 
-const updateContractManagement = async (
-  { id, data }: { id: number; data: UpdateContractManagement }
-): Promise<ContractManagement> => {
-  const response = await fetch(`/api/contract-managements?id=${id}`, {
+const updateContractManagement = async ({ 
+  id, 
+  data 
+}: { 
+  id: number; 
+  data: UpdateContractManagement;
+}): Promise<ContractManagement> => {
+  const response = await fetch(`/api/contract-managements/${id}`, {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json',
@@ -92,7 +103,7 @@ const updateContractManagement = async (
 };
 
 const deleteContractManagement = async (id: number): Promise<{ success: boolean }> => {
-  const response = await fetch(`/api/contract-managements?id=${id}`, {
+  const response = await fetch(`/api/contract-managements/${id}`, {
     method: 'DELETE',
   });
   
@@ -116,7 +127,7 @@ export const useContractManagement = (id: number) => {
   return useQuery<ContractManagement, Error>({
     queryKey: ['contractManagement', id],
     queryFn: () => fetchContractManagementById(id),
-    enabled: !!id, // Only run query if ID is provided
+    enabled: !!id && id > 0, // Only run query if ID is valid (positive)
   });
 };
 

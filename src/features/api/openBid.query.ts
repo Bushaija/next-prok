@@ -15,7 +15,14 @@ const fetchOpenBids = async (): Promise<OpeningBid[]> => {
 };
 
 const fetchOpenBidById = async (id: number): Promise<OpeningBid> => {
-  const response = await fetch(`/api/open-bids?id=${id}`);
+  // Special case for placeholder IDs
+  if (id < 0) {
+    // Return empty data or throw a controlled error
+    throw new Error('Invalid opening bid ID');
+  }
+  
+  // Use the dynamic route format for valid IDs
+  const response = await fetch(`/api/open-bids/${id}`);
   if (!response.ok) {
     throw new Error('Failed to fetch opening bid');
   }
@@ -70,7 +77,7 @@ const updateOpenBid = async ({
   id: number; 
   data: UpdateOpeningBid;
 }): Promise<OpeningBid> => {
-  const response = await fetch(`/api/open-bids?id=${id}`, {
+  const response = await fetch(`/api/open-bids/${id}`, {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json',
@@ -87,7 +94,7 @@ const updateOpenBid = async ({
 };
 
 const deleteOpenBid = async (id: number): Promise<{ success: boolean }> => {
-  const response = await fetch(`/api/open-bids?id=${id}`, {
+  const response = await fetch(`/api/open-bids/${id}`, {
     method: 'DELETE',
   });
   
@@ -111,7 +118,7 @@ export const useOpenBid = (id: number) => {
   return useQuery<OpeningBid, Error>({
     queryKey: ['openBid', id],
     queryFn: () => fetchOpenBidById(id),
-    enabled: !!id, // Only run query if ID is provided
+    enabled: !!id && id > 0, // Only run query if ID is valid (positive)
   });
 };
 

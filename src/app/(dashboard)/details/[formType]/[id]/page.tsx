@@ -1,63 +1,76 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
-import { useParams } from "next/navigation"
-import { 
-  ArrowLeft, 
-  Edit, 
-  Trash, 
-  FileText, 
-  Clock, 
-  Calendar, 
-  User, 
-  DollarSign, 
-  Tag, 
-  Briefcase,
-  CheckCircle,
-  XCircle,
-  AlertCircle
-} from "lucide-react"
+import { ArrowLeft, Download, Edit, Trash } from "lucide-react"
+import React from "react"
 
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Separator } from "@/components/ui/separator"
 import { Badge } from "@/components/ui/badge"
 import { Skeleton } from "@/components/ui/skeleton"
-import { FormType, formTitles } from "@/constants/form-data-object"
-import { useIdentification, useDeleteIdentification } from "@/features/api/identification.query"
-import { usePlanning, useDeletePlanning } from "@/features/api/planning.query"
-import { usePublication, useDeletePublication } from "@/features/api/publication.query"
-import { usePublicationTender, useDeletePublicationTender } from "@/features/api/publicationTender.query"
-import { 
-  ItemIdentification, 
-  Planning, 
-  Publication, 
-  PublicationTender 
-} from "@/db/schema"
-import { formatDate } from "@/lib/utils"
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 
-export default function DetailsPage() {
+import { FormType, formTitles } from "@/constants/form-data-object"
+import { useIdentification } from "@/features/api/identification.query"
+import { usePlanning } from "@/features/api/planning.query"
+import { usePublication } from "@/features/api/publication.query"
+import { usePublicationTender } from "@/features/api/publicationTender.query"
+import { useOpenBid } from "@/features/api/openBid.query"
+import { useBidEvaluation } from "@/features/api/bidEvaluation.query"
+import { useContractSigning } from "@/features/api/contractSigning.query"
+import { useContractManagement } from "@/features/api/contractManagement.query"
+import { useInvoice } from "@/features/api/invoice.query"
+import { formatDate, formatCurrency } from "@/lib/utils"
+
+interface DetailsPageProps {
+  params: {
+    formType: FormType
+    id: string
+  }
+}
+
+export default function DetailsPage({ params }: DetailsPageProps) {
+  const unwrappedParams = React.use(params);
+  const { formType, id } = unwrappedParams;
+  
   const router = useRouter()
-  const params = useParams()
+  const [activeTab, setActiveTab] = useState("overview")
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
-  
-  const formType = params.formType as FormType
-  const id = parseInt(params.id as string)
-  
+
   // Fetch data based on form type
-  const { data: identification, isLoading: isLoadingIdentification } = useIdentification(id)
-  const { data: planning, isLoading: isLoadingPlanning } = usePlanning(id)
-  const { data: publication, isLoading: isLoadingPublication } = usePublication(id)
-  const { data: publicationTender, isLoading: isLoadingPublicationTender } = usePublicationTender(id)
-  
-  const deleteIdentification = useDeleteIdentification()
-  const deletePlanning = useDeletePlanning()
-  const deletePublication = useDeletePublication()
-  const deletePublicationTender = useDeletePublicationTender()
-  
-  // Get data and loading state based on form type
-  const getData = () => {
+  const { data: identification, isLoading: isLoadingIdentification } = useIdentification(
+    formType === "identification" ? parseInt(id) : -1
+  )
+  const { data: planning, isLoading: isLoadingPlanning } = usePlanning(
+    formType === "planning" ? parseInt(id) : -1
+  )
+  const { data: publication, isLoading: isLoadingPublication } = usePublication(
+    formType === "publication" ? parseInt(id) : -1
+  )
+  const { data: publicationTender, isLoading: isLoadingPublicationTender } = usePublicationTender(
+    formType === "publicationTender" ? parseInt(id) : -1
+  )
+  const { data: openBid, isLoading: isLoadingOpenBid } = useOpenBid(
+    formType === "openBid" ? parseInt(id) : -1
+  )
+  const { data: bidEvaluation, isLoading: isLoadingBidEvaluation } = useBidEvaluation(
+    formType === "bidEvaluation" ? parseInt(id) : -1
+  )
+  const { data: contractSigning, isLoading: isLoadingContractSigning } = useContractSigning(
+    formType === "contractSigning" ? parseInt(id) : -1
+  )
+  const { data: contractManagement, isLoading: isLoadingContractManagement } = useContractManagement(
+    formType === "contractManagement" ? parseInt(id) : -1
+  )
+  const { data: invoice, isLoading: isLoadingInvoice } = useInvoice(
+    formType === "invoice" ? parseInt(id) : -1
+  )
+
+  // Get current data and loading state
+  const getCurrentData = () => {
     switch (formType) {
       case "identification":
         return identification
@@ -67,11 +80,21 @@ export default function DetailsPage() {
         return publication
       case "publicationTender":
         return publicationTender
+      case "openBid":
+        return openBid
+      case "bidEvaluation":
+        return bidEvaluation
+      case "contractSigning":
+        return contractSigning
+      case "contractManagement":
+        return contractManagement
+      case "invoice":
+        return invoice
       default:
         return null
     }
   }
-  
+
   const isLoading = () => {
     switch (formType) {
       case "identification":
@@ -82,275 +105,190 @@ export default function DetailsPage() {
         return isLoadingPublication
       case "publicationTender":
         return isLoadingPublicationTender
+      case "openBid":
+        return isLoadingOpenBid
+      case "bidEvaluation":
+        return isLoadingBidEvaluation
+      case "contractSigning":
+        return isLoadingContractSigning
+      case "contractManagement":
+        return isLoadingContractManagement
+      case "invoice":
+        return isLoadingInvoice
       default:
         return false
     }
   }
-  
-  const data = getData()
-  
-  if (isLoading()) {
-    return (
-      <div className="container mx-auto py-10">
-        <div className="flex justify-center items-center h-64">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-        </div>
-      </div>
-    )
+
+  const data = getCurrentData()
+
+  console.log("current data", data);
+
+  // Navigate back to list
+  const handleBack = () => {
+    router.push(`/list?formType=${formType}`)
   }
-  
+
+  // Handle edit
+  const handleEdit = () => {
+    router.push(`/edit/${formType}/${id}`)
+  }
+
+  // Handle delete
+  const handleDelete = () => {
+    setShowDeleteConfirm(true)
+  }
+
+  // Export to PDF
+  const handleExport = () => {
+    // PDF export functionality would go here
+    console.log("Export to PDF", data)
+  }
+
+  if (isLoading()) {
+    return <DetailsPageSkeleton formType={formType} />
+  }
+
   if (!data) {
     return (
-      <div className="container mx-auto py-10">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold mb-4">Not Found</h1>
-          <p>The requested item could not be found.</p>
-        </div>
+      <div className="container mx-auto py-10 max-w-4xl">
+        <Button variant="ghost" onClick={handleBack} className="mb-6">
+          <ArrowLeft className="mr-2 h-4 w-4" /> Back to List
+        </Button>
+        
+        <Alert variant="destructive">
+          <AlertTitle>Error</AlertTitle>
+          <AlertDescription>
+            The requested {formTitles[formType]} with ID {id} could not be found.
+          </AlertDescription>
+        </Alert>
       </div>
     )
   }
-  
-  // Function to handle edit action
-  const handleEdit = () => {
-    router.push(`#/edit/${formType}/${id}`)
-  }
-  
-  // Function to handle delete confirmation
-  const handleDeleteConfirm = async () => {
-    try {
-      switch (formType) {
-        case "identification":
-          await deleteIdentification.mutateAsync(id)
-          break
-        case "planning":
-          await deletePlanning.mutateAsync(id)
-          break
-        case "publication":
-          await deletePublication.mutateAsync(id)
-          break
-        case "publicationTender":
-          await deletePublicationTender.mutateAsync(id)
-          break
-        default:
-          console.error(`Delete not implemented for form type: ${formType}`)
-      }
-      router.push("/list")
-    } catch (error) {
-      console.error(`Error deleting ${formType}:`, error)
-    } finally {
-      setShowDeleteConfirm(false)
-    }
-  }
-  
-  // Function to handle export to PDF
-  const handleExportPDF = () => {
-    console.log(`Export ${formType} with ID: ${id} to PDF`)
-    // Implement PDF export functionality
-  }
-  
-  // Function to get status badge based on status value
-  const getStatusBadge = (status: string) => {
-    switch (status.toLowerCase()) {
-      case "approved":
-        return (
-          <Badge className="bg-green-100 text-green-800 hover:bg-green-200 flex items-center gap-1">
-            <CheckCircle className="h-3 w-3" />
-            Approved
-          </Badge>
-        )
-      case "rejected":
-        return (
-          <Badge className="bg-red-100 text-red-800 hover:bg-red-200 flex items-center gap-1">
-            <XCircle className="h-3 w-3" />
-            Rejected
-          </Badge>
-        )
-      case "pending":
-      default:
-        return (
-          <Badge className="bg-yellow-100 text-yellow-800 hover:bg-yellow-200 flex items-center gap-1">
-            <AlertCircle className="h-3 w-3" />
-            Pending
-          </Badge>
-        )
-    }
-  }
-  
+
   return (
-    <div className="container mx-auto max-w-screen-lg py-10">
-      <div className="flex items-center mb-8">
-        <Button
-          variant="ghost"
-          onClick={() => router.back()}
-          className="mr-4"
-        >
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          Back
+    <div className="max-w-screen-2xl mx-auto w-full pb-10 -mt-24 bg-white rounded-xl p-4">
+      {/* Back button and actions */}
+      <div className="flex justify-between items-center mb-6">
+        <Button variant="ghost" onClick={handleBack}>
+          <ArrowLeft className="mr-2 h-4 w-4" /> Back to List
         </Button>
-        <h1 className="text-2xl font-bold">
-          {formTitles[formType]} Details
-        </h1>
-      </div>
-      
-      <div className="grid gap-6">
-        {formType === "identification" && (
-          <Card>
-            <CardHeader>
-              <CardTitle>Identification Details</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <h3 className="font-semibold mb-2">Division</h3>
-                  <p>{(data as ItemIdentification).division}</p>
-                </div>
-                <div>
-                  <h3 className="font-semibold mb-2">Tender Title</h3>
-                  <p>{(data as ItemIdentification).tenderTitle}</p>
-                </div>
-                <div>
-                  <h3 className="font-semibold mb-2">Category</h3>
-                  <p>{(data as ItemIdentification).category}</p>
-                </div>
-                <div>
-                  <h3 className="font-semibold mb-2">Budget</h3>
-                  <p>
-                    {new Intl.NumberFormat("en-US", {
-                      style: "currency",
-                      currency: "USD",
-                    }).format((data as ItemIdentification).budget)}
-                  </p>
-                </div>
-                <div>
-                  <h3 className="font-semibold mb-2">Status</h3>
-                  <Badge variant={
-                    (data as ItemIdentification).status === "Approved" ? "default" :
-                    (data as ItemIdentification).status === "Rejected" ? "destructive" :
-                    "secondary"
-                  }>
-                    {(data as ItemIdentification).status}
-                  </Badge>
-                </div>
-                <div>
-                  <h3 className="font-semibold mb-2">Created At</h3>
-                  <p>{formatDate((data as ItemIdentification).createdAt)}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        )}
         
-        {formType === "planning" && (
-          <Card>
-            <CardHeader>
-              <CardTitle>Planning Details</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <h3 className="font-semibold mb-2">Tender Title</h3>
-                  <p>{(data as Planning).tenderTitle}</p>
-                </div>
-                <div>
-                  <h3 className="font-semibold mb-2">Estimated Budget</h3>
-                  <p>
-                    {new Intl.NumberFormat("en-US", {
-                      style: "currency",
-                      currency: "USD",
-                    }).format((data as Planning).estimatedBudget)}
-                  </p>
-                </div>
-                <div>
-                  <h3 className="font-semibold mb-2">Status</h3>
-                  <Badge variant={
-                    (data as Planning).planningStatus === "Approved" ? "default" :
-                    (data as Planning).planningStatus === "Rejected" ? "destructive" :
-                    "secondary"
-                  }>
-                    {(data as Planning).planningStatus}
-                  </Badge>
-                </div>
-                <div>
-                  <h3 className="font-semibold mb-2">Created At</h3>
-                  <p>{formatDate((data as Planning).createdAt)}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        )}
-        
-        {formType === "publication" && (
-          <Card>
-            <CardHeader>
-              <CardTitle>Publication Details</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <h3 className="font-semibold mb-2">Tender Title</h3>
-                  <p>{(data as Publication).tenderTitle}</p>
-                </div>
-                <div>
-                  <h3 className="font-semibold mb-2">Revision</h3>
-                  <p>{(data as Publication).revision}</p>
-                </div>
-                <div>
-                  <h3 className="font-semibold mb-2">Initial Publication Date</h3>
-                  <p>{formatDate((data as Publication).initialProcurementPlanPublication)}</p>
-                </div>
-                <div>
-                  <h3 className="font-semibold mb-2">Created At</h3>
-                  <p>{formatDate((data as Publication).createdAt)}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        )}
-        
-        {formType === "publicationTender" && (
-          <Card>
-            <CardHeader>
-              <CardTitle>Publication Tender Details</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <h3 className="font-semibold mb-2">Tender Title</h3>
-                  <p>{(data as PublicationTender).tenderTitle}</p>
-                </div>
-                <div>
-                  <h3 className="font-semibold mb-2">Publication Date</h3>
-                  <p>{formatDate((data as PublicationTender).dateOfTenderPublication)}</p>
-                </div>
-                <div>
-                  <h3 className="font-semibold mb-2">CBM Approval Date</h3>
-                  <p>{formatDate((data as PublicationTender).dateOfCBMApproval)}</p>
-                </div>
-                <div>
-                  <h3 className="font-semibold mb-2">Created At</h3>
-                  <p>{formatDate((data as PublicationTender).createdAt)}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        )}
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={handleExport}>
+            <Download className="mr-2 h-4 w-4" /> Export
+          </Button>
+          <Button variant="outline" onClick={handleEdit}>
+            <Edit className="mr-2 h-4 w-4" /> Edit
+          </Button>
+          <Button variant="destructive" onClick={handleDelete}>
+            <Trash className="mr-2 h-4 w-4" /> Delete
+          </Button>
+        </div>
       </div>
-      
-      <div className="mt-8">
-        <Button variant="outline" onClick={handleEdit}>
-          <Edit className="h-4 w-4 mr-2" />
-          Edit
-        </Button>
-        <Button variant="outline" onClick={handleExportPDF}>
-          <FileText className="h-4 w-4 mr-2" />
-          Export PDF
-        </Button>
-        <Button variant="destructive" onClick={() => setShowDeleteConfirm(true)}>
-          <Trash className="h-4 w-4 mr-2" />
-          Delete
-        </Button>
-      </div>
-      
+
+      {/* Header Card */}
+      <Card className="mb-6">
+        <CardHeader>
+          <div className="flex justify-between items-start">
+            <div>
+              <CardTitle className="text-2xl">{formTitles[formType]} Details</CardTitle>
+              <CardDescription>
+                {data.tenderTitle || `${formTitles[formType]} #${id}`}
+              </CardDescription>
+            </div>
+            <StatusBadge formType={formType} data={data} />
+          </div>
+        </CardHeader>
+        
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <DetailItem label="ID" value={data.id} />
+            
+            {/* Common fields that most form types have */}
+            {data.tenderTitle && (
+              <DetailItem label="Tender Title" value={data.tenderTitle} />
+            )}
+            {'division' in data && data.division && (
+              <DetailItem label="Division" value={data.division} />
+            )}
+            {'category' in data && data.category && (
+              <DetailItem label="Category" value={data.category} />
+            )}
+            {data.createdAt && (
+              <DetailItem 
+                label="Created At" 
+                value={formatDate(new Date(data.createdAt))} 
+              />
+            )}
+            {data.updatedAt && (
+              <DetailItem 
+                label="Updated At" 
+                value={formatDate(new Date(data.updatedAt))} 
+              />
+            )}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Detailed Content with Tabs */}
+      <Tabs value={activeTab} onValueChange={setActiveTab}>
+        <TabsList className="mb-6">
+          <TabsTrigger value="overview">Overview</TabsTrigger>
+          <TabsTrigger value="details">Detailed Information</TabsTrigger>
+          <TabsTrigger value="documents">Documents</TabsTrigger>
+          <TabsTrigger value="history">History</TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value="overview" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Summary</CardTitle>
+              <CardDescription>Key information about this {formTitles[formType].toLowerCase()}</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <RenderFormTypeOverview formType={formType} data={data} />
+            </CardContent>
+          </Card>
+        </TabsContent>
+        
+        <TabsContent value="details" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Detailed Information</CardTitle>
+              <CardDescription>Complete details of this {formTitles[formType].toLowerCase()}</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <RenderFormTypeDetails formType={formType} data={data} />
+            </CardContent>
+          </Card>
+        </TabsContent>
+        
+        <TabsContent value="documents" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Documents</CardTitle>
+              <CardDescription>Attached documents and files</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <RenderFormTypeDocuments formType={formType} data={data} />
+            </CardContent>
+          </Card>
+        </TabsContent>
+        
+        <TabsContent value="history" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>History</CardTitle>
+              <CardDescription>Timeline of changes and events</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <RenderFormTypeHistory formType={formType} data={data} />
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
+
       {/* Delete confirmation dialog */}
       {showDeleteConfirm && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
@@ -361,31 +299,354 @@ export default function DetailsPage() {
             </p>
             <div className="flex justify-end space-x-2">
               <Button 
-                variant="outline" 
-                onClick={() => setShowDeleteConfirm(false)}
-              >
-                Cancel
-              </Button>
-              <Button 
                 variant="destructive" 
-                onClick={handleDeleteConfirm}
-                disabled={
-                  (formType === "identification" && deleteIdentification.isLoading) ||
-                  (formType === "planning" && deletePlanning.isLoading) ||
-                  (formType === "publication" && deletePublication.isLoading) ||
-                  (formType === "publicationTender" && deletePublicationTender.isLoading)
-                }
+                onClick={() => {
+                  // Handle delete logic here
+                  setShowDeleteConfirm(false)
+                  router.push(`/list?formType=${formType}`)
+                }}
               >
-                {(formType === "identification" && deleteIdentification.isLoading) ||
-                 (formType === "planning" && deletePlanning.isLoading) ||
-                 (formType === "publication" && deletePublication.isLoading) ||
-                 (formType === "publicationTender" && deletePublicationTender.isLoading)
-                  ? "Deleting..." : "Delete"}
+                Delete
+              </Button>
+              <Button variant="outline" onClick={() => setShowDeleteConfirm(false)}>
+                Cancel
               </Button>
             </div>
           </div>
         </div>
       )}
+    </div>
+  )
+}
+
+// Loading skeleton
+function DetailsPageSkeleton({ formType }: { formType: FormType }) {
+  return (
+    <div className="container mx-auto py-10 max-w-4xl">
+      <div className="flex justify-between items-center mb-6">
+        <Skeleton className="h-10 w-24" />
+        <div className="flex gap-2">
+          <Skeleton className="h-10 w-28" />
+          <Skeleton className="h-10 w-24" />
+          <Skeleton className="h-10 w-24" />
+        </div>
+      </div>
+
+      <Card className="mb-6">
+        <CardHeader>
+          <div className="flex justify-between items-start">
+            <div>
+              <Skeleton className="h-8 w-64 mb-2" />
+              <Skeleton className="h-4 w-48" />
+            </div>
+            <Skeleton className="h-6 w-24" />
+          </div>
+        </CardHeader>
+        
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {Array(6).fill(0).map((_, index) => (
+              <div key={index} className="space-y-2">
+                <Skeleton className="h-4 w-24" />
+                <Skeleton className="h-6 w-full" />
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+
+      <div className="mb-6">
+        <Skeleton className="h-10 w-full max-w-md" />
+      </div>
+
+      <Card>
+        <CardHeader>
+          <Skeleton className="h-6 w-48 mb-2" />
+          <Skeleton className="h-4 w-72" />
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            {Array(8).fill(0).map((_, index) => (
+              <Skeleton key={index} className="h-10 w-full" />
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  )
+}
+
+// Status badge based on form type
+function StatusBadge({ formType, data }: { formType: FormType; data: any }) {
+  if (!data.status) return null
+
+  let variant: "default" | "secondary" | "destructive" | "outline" | null = null
+  
+  switch (data.status?.toLowerCase()) {
+    case "completed":
+    case "approved":
+    case "accepted":
+      variant = "default"
+      break
+    case "in progress":
+    case "pending":
+    case "awaiting":
+      variant = "secondary"
+      break
+    case "rejected":
+    case "cancelled":
+    case "failed":
+      variant = "destructive"
+      break
+    default:
+      variant = "outline"
+  }
+
+  return (
+    <Badge variant={variant}>
+      {data.status}
+    </Badge>
+  )
+}
+
+// Generic detail item component
+function DetailItem({ label, value }: { label: string; value: any }) {
+  if (value === undefined || value === null) return null
+  
+  const displayValue = typeof value === 'object' 
+    ? JSON.stringify(value) 
+    : String(value)
+  
+  return (
+    <div className="space-y-1">
+      <p className="text-sm font-medium text-muted-foreground">{label}</p>
+      <p className="text-base break-words">{displayValue}</p>
+    </div>
+  )
+}
+
+// Form type specific renderers
+function RenderFormTypeOverview({ formType, data }: { formType: FormType; data: any }) {
+  switch (formType) {
+    case "identification":
+      return (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <DetailItem label="Budget" value={formatCurrency(data.budget)} />
+          <DetailItem label="Division" value={data.division} />
+          <DetailItem label="Tender Method" value={data.tenderMethod} />
+          <DetailItem label="Specifications" value={data.specifications} />
+        </div>
+      )
+    
+    case "planning":
+      return (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <DetailItem label="Planning Date" value={formatDate(new Date(data.planningDate))} />
+          <DetailItem label="Status" value={data.status} />
+          <DetailItem label="Planned Start Date" value={formatDate(new Date(data.plannedStartDate))} />
+          <DetailItem label="Planned End Date" value={formatDate(new Date(data.plannedEndDate))} />
+        </div>
+      )
+    
+    case "publication":
+      return (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <DetailItem label="Publication Type" value={data.publicationType} />
+          <DetailItem label="Publication Date" value={formatDate(new Date(data.publicationDate))} />
+          <DetailItem label="Approver" value={data.approver} />
+          <DetailItem label="Status" value={data.status} />
+        </div>
+      )
+    
+    case "publicationTender":
+      return (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <DetailItem label="Announcement Date" value={formatDate(new Date(data.announcementDate))} />
+          <DetailItem label="Submission Deadline" value={formatDate(new Date(data.submissionDeadline))} />
+          <DetailItem label="Announcement URL" value={data.announcementUrl} />
+          <DetailItem label="Status" value={data.status} />
+        </div>
+      )
+    
+    case "openBid":
+      return (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <DetailItem label="Opening Date" value={formatDate(new Date(data.openingDate))} />
+          <DetailItem label="Number of Bidders" value={data.numberOfBidders} />
+          <DetailItem label="Committee Members" value={data.committeeMembers} />
+          <DetailItem label="Status" value={data.status} />
+        </div>
+      )
+    
+    case "bidEvaluation":
+      return (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <DetailItem label="Evaluation Date" value={formatDate(new Date(data.evaluationDate))} />
+          <DetailItem label="Winning Bidder" value={data.winningBidder} />
+          <DetailItem label="Bid Amount" value={formatCurrency(data.bidAmount)} />
+          <DetailItem label="Status" value={data.status} />
+        </div>
+      )
+    
+    case "contractSigning":
+      return (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <DetailItem label="Signing Date" value={formatDate(new Date(data.signingDate))} />
+          <DetailItem label="Contract Amount" value={formatCurrency(data.contractAmount)} />
+          <DetailItem label="Contractor" value={data.contractor} />
+          <DetailItem label="Contract Duration" value={`${data.contractDuration} days`} />
+        </div>
+      )
+    
+    case "contractManagement":
+      return (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <DetailItem label="Start Date" value={formatDate(new Date(data.startDate))} />
+          <DetailItem label="End Date" value={formatDate(new Date(data.endDate))} />
+          <DetailItem label="Contract Manager" value={data.contractManager} />
+          <DetailItem label="Completion Percentage" value={`${data.completionPercentage}%`} />
+        </div>
+      )
+    
+    case "invoice":
+      return (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <DetailItem label="Invoice Date" value={formatDate(new Date(data.invoiceDate))} />
+          <DetailItem label="Invoice Number" value={data.invoiceNumber} />
+          <DetailItem label="Amount" value={formatCurrency(data.amount)} />
+          <DetailItem label="Payment Status" value={data.paymentStatus} />
+        </div>
+      )
+    
+    default:
+      return (
+        <p>No overview data available for this form type.</p>
+      )
+  }
+}
+
+function RenderFormTypeDetails({ formType, data }: { formType: FormType; data: any }) {
+  // For each form type, we'll render all available data organized in sections
+  
+  const renderFields = (data: any) => {
+    if (!data) return null
+    
+    // Filter out common fields that are already shown in the overview
+    const commonFields = ['id', 'createdAt', 'updatedAt']
+    
+    // Group fields into sections
+    const fieldGroups: Record<string, string[]> = {
+      General: [],
+      Dates: [],
+      Financial: [],
+      People: [],
+      Other: []
+    }
+    
+    // Classify fields
+    Object.keys(data).forEach(key => {
+      if (commonFields.includes(key)) return
+      
+      if (key.toLowerCase().includes('date') || key.toLowerCase().includes('time')) {
+        fieldGroups.Dates.push(key)
+      } else if (key.toLowerCase().includes('amount') || key.toLowerCase().includes('budget') || 
+                key.toLowerCase().includes('cost') || key.toLowerCase().includes('payment')) {
+        fieldGroups.Financial.push(key)
+      } else if (key.toLowerCase().includes('name') || key.toLowerCase().includes('person') || 
+                key.toLowerCase().includes('manager') || key.toLowerCase().includes('member') ||
+                key.toLowerCase().includes('bidder') || key.toLowerCase().includes('contractor')) {
+        fieldGroups.People.push(key)
+      } else if (key === 'tenderTitle' || key === 'division' || key === 'status' || key === 'category') {
+        fieldGroups.General.push(key)
+      } else {
+        fieldGroups.Other.push(key)
+      }
+    })
+    
+    return (
+      <div className="space-y-8">
+        {Object.entries(fieldGroups).map(([groupName, fields]) => {
+          if (fields.length === 0) return null
+          
+          return (
+            <div key={groupName}>
+              <h3 className="text-lg font-semibold mb-4">{groupName} Information</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {fields.map(field => (
+                  <DetailItem 
+                    key={field} 
+                    label={field.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())} 
+                    value={field.toLowerCase().includes('date') && data[field] ? formatDate(new Date(data[field])) : data[field]} 
+                  />
+                ))}
+              </div>
+              <Separator className="mt-6" />
+            </div>
+          )
+        })}
+      </div>
+    )
+  }
+  
+  return renderFields(data)
+}
+
+function RenderFormTypeDocuments({ formType, data }: { formType: FormType; data: any }) {
+  // Placeholder for documents section - in a real app, this would display attachments
+  return (
+    <div className="space-y-4">
+      {data.documents && data.documents.length > 0 ? (
+        data.documents.map((doc: any, index: number) => (
+          <div key={index} className="flex items-center gap-2 p-3 border rounded-md">
+            <div className="flex-1">
+              <p className="font-medium">{doc.name}</p>
+              <p className="text-sm text-muted-foreground">{doc.type} • {doc.size}</p>
+            </div>
+            <Button variant="outline" size="sm">
+              <Download className="h-4 w-4 mr-1" /> Download
+            </Button>
+          </div>
+        ))
+      ) : (
+        <p className="text-muted-foreground">No documents attached to this {formTitles[formType].toLowerCase()}.</p>
+      )}
+    </div>
+  )
+}
+
+function RenderFormTypeHistory({ formType, data }: { formType: FormType; data: any }) {
+  // Placeholder for history section - in a real app, this would display a timeline of changes
+  
+  // Mock history data
+  const historyItems = [
+    {
+      date: new Date(data.createdAt || new Date()),
+      action: "Created",
+      user: "System User",
+      details: `${formTitles[formType]} created`
+    },
+    {
+      date: new Date(data.updatedAt || new Date()),
+      action: "Updated",
+      user: "System User",
+      details: `${formTitles[formType]} information updated`
+    }
+  ]
+  
+  return (
+    <div className="space-y-6">
+      {historyItems.map((item, index) => (
+        <div key={index} className="flex gap-4 items-start">
+          <div className="min-w-[100px] text-sm text-muted-foreground">
+            {formatDate(item.date)}
+          </div>
+          <div>
+            <p className="font-medium">{item.action}</p>
+            <p className="text-sm text-muted-foreground">By: {item.user}</p>
+            <p className="text-sm mt-1">{item.details}</p>
+          </div>
+        </div>
+      ))}
     </div>
   )
 } 

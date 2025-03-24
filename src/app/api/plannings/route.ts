@@ -11,6 +11,8 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const id = searchParams.get('id');
 
+    console.log("passed id::", id);
+
     // If ID is provided, fetch a specific planning
     if (id) {
       const planningId = parseInt(id, 10);

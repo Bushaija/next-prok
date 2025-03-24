@@ -15,7 +15,14 @@ const fetchContractSignings = async (): Promise<ContractSigning[]> => {
 };
 
 const fetchContractSigningById = async (id: number): Promise<ContractSigning> => {
-  const response = await fetch(`/api/contract-signings?id=${id}`);
+  // Special case for placeholder IDs
+  if (id < 0) {
+    // Return empty data or throw a controlled error
+    throw new Error('Invalid contract signing ID');
+  }
+  
+  // Use the dynamic route format for valid IDs
+  const response = await fetch(`/api/contract-signings/${id}`);
   if (!response.ok) {
     throw new Error('Failed to fetch contract signing');
   }
@@ -72,10 +79,14 @@ const createContractSigning = async (data: NewContractSigning): Promise<Contract
   return response.json();
 };
 
-const updateContractSigning = async (
-  { id, data }: { id: number; data: UpdateContractSigning }
-): Promise<ContractSigning> => {
-  const response = await fetch(`/api/contract-signings?id=${id}`, {
+const updateContractSigning = async ({ 
+  id, 
+  data 
+}: { 
+  id: number; 
+  data: UpdateContractSigning;
+}): Promise<ContractSigning> => {
+  const response = await fetch(`/api/contract-signings/${id}`, {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json',
@@ -92,7 +103,7 @@ const updateContractSigning = async (
 };
 
 const deleteContractSigning = async (id: number): Promise<{ success: boolean }> => {
-  const response = await fetch(`/api/contract-signings?id=${id}`, {
+  const response = await fetch(`/api/contract-signings/${id}`, {
     method: 'DELETE',
   });
   
@@ -116,7 +127,7 @@ export const useContractSigning = (id: number) => {
   return useQuery<ContractSigning, Error>({
     queryKey: ['contractSigning', id],
     queryFn: () => fetchContractSigningById(id),
-    enabled: !!id, // Only run query if ID is provided
+    enabled: !!id && id > 0, // Only run query if ID is valid (positive)
   });
 };
 

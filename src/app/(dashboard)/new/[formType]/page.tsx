@@ -26,6 +26,7 @@ import {
 } from "@/db/schema";
 import { Loader2 } from "lucide-react";
 import { NavMenu }  from "@/components/nav-menu";
+import React from "react";
 
 export default function DynamicForm() {
   const params = useParams();
@@ -347,12 +348,8 @@ export default function DynamicForm() {
   console.log("formFields:: ", formFields);
 
   return (
-    <>
-    <div className="flex flex-col items-center mx-auto max-w-screen-lg min-h-screen">
-      <div className="flex justify-center items-center w-full mt-4">
-        <NavMenu />
-      </div>
-      
+    <section className="max-w-screen-2xl mx-auto w-full pb-10 -mt-24 bg-white rounded-xl p-4">
+    <div>
       
       {error && (
         <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4 w-full">
@@ -366,10 +363,10 @@ export default function DynamicForm() {
         </div>
       )}
       
-      <div className="pt-12">
+      <div className="">
       {formFields.length > 0 ? (
         <>
-          <div className="w-full mt-4">
+          <div className="w-full">
             <h1 className="flex items-start text-xl font-bold mb-4">{formTitle}</h1>
           </div>
           <Form fields={formFieldsForComponent} onSubmit={handleFormSubmit} />
@@ -388,6 +385,6 @@ export default function DynamicForm() {
       )}
       </div>
     </div>
-    </>
+    </section>
   );
 } 

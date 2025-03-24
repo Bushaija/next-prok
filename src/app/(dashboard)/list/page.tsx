@@ -170,7 +170,7 @@ function ListPageContent() {
   
   // Function to handle edit action
   const handleEdit = (id: number) => {
-    router.push(`#/edit/${formType}/${id}`);
+    router.push(`/edit/${formType}/${id}`);
   };
   
   // Function to open delete confirmation
@@ -1016,10 +1016,10 @@ function ListPageContent() {
   };
   
   return (
-    <div className="container mx-auto py-10 mx-auto max-w-screen-lg">
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold">{formTitles[formType]} List</h1>
-        <p className="text-muted-foreground mt-1">{formDescriptions[formType]}</p>
+    <div className="p-4">
+      <div>
+        <h1 className="text-2xl font-bold text-blue-600">{formTitles[formType]} List</h1>
+        <p className="text-muted-foreground mt-1 text-blue-600">{formDescriptions[formType]}</p>
       </div>
       
       {isLoading() ? (
@@ -1068,7 +1068,7 @@ function ListPageContent() {
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button>
-                      <Plus className="mr-2 h-4 w-4" /> Create New <ChevronDown className="ml-2 h-4 w-4" />
+                      <Plus className="mr-2 h-4 w-4 bg-blue-600 text-white rounded-full" /> Create New <ChevronDown className="ml-2 h-4 w-4" />
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
@@ -1136,10 +1136,7 @@ function ListPageContent() {
 // Main ListPage component that uses Suspense
 export default function ListPage() {
   return (
-    <section>
-      <div className="flex justify-center items-center w-full mt-8">
-        <NavMenu />
-      </div>
+    <section className="max-w-screen-2xl p-12 mx-auto w-full pb-10 -mt-24 border-2 bg-white rounded-xl">
       <Suspense fallback={<ListPageLoading />}>
         <ListPageContent />
       </Suspense>

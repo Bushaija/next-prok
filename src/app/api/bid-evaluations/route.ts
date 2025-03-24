@@ -1,39 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { BidEvaluationService } from '@/services/bidEvaluationService';
 import { 
-  bidEvaluationSchema,
-  newBidEvaluationSchema, 
-  updateBidEvaluationSchema 
+  newBidEvaluationSchema
 } from '@/db/schema';
 
 const bidEvaluationService = new BidEvaluationService();
 
-// GET handler to retrieve all bid evaluations or filter by ID or other criteria
+// GET handler to retrieve all bid evaluations or filter by criteria
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
-    const id = searchParams.get('id');
     const openBidId = searchParams.get('openBidId');
     const tenderTitle = searchParams.get('tenderTitle');
     const status = searchParams.get('status');
     const dateFrom = searchParams.get('dateFrom');
     const dateTo = searchParams.get('dateTo');
     const evaluationTeam = searchParams.get('evaluationTeam');
-    
-    // If ID is provided, fetch a specific bid evaluation
-    if (id) {
-      const evaluationId = parseInt(id, 10);
-      if (isNaN(evaluationId)) {
-        return NextResponse.json({ error: 'Invalid ID format' }, { status: 400 });
-      }
-      
-      const evaluation = await bidEvaluationService.getById(evaluationId);
-      if (!evaluation) {
-        return NextResponse.json({ error: 'Bid evaluation not found' }, { status: 404 });
-      }
-      
-      return NextResponse.json(evaluation);
-    }
     
     // If search parameters are provided, use search function
     if (openBidId || tenderTitle || status || dateFrom || dateTo || evaluationTeam) {

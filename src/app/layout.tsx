@@ -1,8 +1,8 @@
 import "./globals.css";
 import QueryProvider from "@/providers/query-provider";
-import { Inter } from "next/font/google";
 
-const inter = Inter({ subsets: ["latin"] });
+import { Toaster } from "@/components/ui/sonner";
+import { ClerkProvider } from "@clerk/nextjs";
 
 export const metadata = {
   title: "Procurement Life Cycle Management",
@@ -15,12 +15,15 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body className={inter.className}>
-        <QueryProvider>
-          {children}
-        </QueryProvider>
-      </body>
-    </html>
+    <ClerkProvider>
+      <html lang="en">
+        <body>
+          <QueryProvider>
+            <Toaster />
+            {children}
+          </QueryProvider>
+        </body>
+      </html>
+    </ClerkProvider>
   );
 }

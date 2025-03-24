@@ -16,7 +16,14 @@ const fetchPublicationTenders = async (): Promise<PublicationTender[]> => {
 };
 
 const fetchPublicationTenderById = async (id: number): Promise<PublicationTender> => {
-  const response = await fetch(`/api/publication-tenders?id=${id}`);
+  // Special case for placeholder IDs
+  if (id < 0) {
+    // Return empty data or throw a controlled error
+    throw new Error('Invalid publication tender ID');
+  }
+  
+  // Use the dynamic route format for valid IDs
+  const response = await fetch(`/api/publication-tenders/${id}`);
   if (!response.ok) {
     throw new Error('Failed to fetch publication tender');
   }
@@ -47,7 +54,7 @@ const updatePublicationTender = async ({
   id: number; 
   data: UpdatePublicationTender;
 }): Promise<PublicationTender> => {
-  const response = await fetch(`/api/publication-tenders?id=${id}`, {
+  const response = await fetch(`/api/publication-tenders/${id}`, {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json',
@@ -64,7 +71,7 @@ const updatePublicationTender = async ({
 };
 
 const deletePublicationTender = async (id: number): Promise<{ success: boolean }> => {
-  const response = await fetch(`/api/publication-tenders?id=${id}`, {
+  const response = await fetch(`/api/publication-tenders/${id}`, {
     method: 'DELETE',
   });
   
@@ -125,7 +132,7 @@ export const usePublicationTender = (id: number) => {
   return useQuery<PublicationTender, Error>({
     queryKey: ['publicationTender', id],
     queryFn: () => fetchPublicationTenderById(id),
-    enabled: !!id, // Only run the query if id is provided
+    enabled: !!id && id > 0, // Only run the query if id is valid (positive)
   });
 };
 
@@ -253,4 +260,4 @@ export const usePublicationTendersByDateRange = (startDate: Date, endDate: Date)
     },
     enabled: !!(startDate && endDate), // Only run the query if both dates are provided
   });
-}; 
+};

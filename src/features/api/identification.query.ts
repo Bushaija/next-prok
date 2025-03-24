@@ -15,7 +15,14 @@ const fetchIdentifications = async (): Promise<ItemIdentification[]> => {
 };
 
 const fetchIdentificationById = async (id: number): Promise<ItemIdentification> => {
-  const response = await fetch(`/api/item-identifications?id=${id}`);
+  // Special case for placeholder IDs
+  if (id < 0) {
+    // Return empty data or throw a controlled error
+    throw new Error('Invalid identification ID');
+  }
+  
+  // Use the dynamic route format for valid IDs
+  const response = await fetch(`/api/item-identifications/${id}`);
   if (!response.ok) {
     throw new Error('Failed to fetch identification');
   }
@@ -46,7 +53,7 @@ const updateIdentification = async ({
   id: number; 
   data: UpdateItemIdentification;
 }): Promise<ItemIdentification> => {
-  const response = await fetch(`/api/item-identifications?id=${id}`, {
+  const response = await fetch(`/api/item-identifications/${id}`, {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json',
@@ -63,7 +70,7 @@ const updateIdentification = async ({
 };
 
 const deleteIdentification = async (id: number): Promise<{ success: boolean }> => {
-  const response = await fetch(`/api/item-identifications?id=${id}`, {
+  const response = await fetch(`/api/item-identifications/${id}`, {
     method: 'DELETE',
   });
   
@@ -87,7 +94,7 @@ export const useIdentification = (id: number) => {
   return useQuery<ItemIdentification, Error>({
     queryKey: ['identification', id],
     queryFn: () => fetchIdentificationById(id),
-    enabled: !!id, // Only run the query if id is provided
+    enabled: !!id && id > 0, // Only run the query if id is valid (positive)
   });
 };
 
