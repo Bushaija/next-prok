@@ -937,13 +937,16 @@ function ListPageContent() {
     const headers = columns
       .filter(col => col.id !== 'actions')
       .map(col => {
-        // Use header if it's a string, otherwise use id as fallback
+        // Use header if it's a string, otherwise use accessorKey or id as fallback
         if (typeof col.header === 'string') {
           return col.header;
+        } else if ('accessorKey' in col && typeof col.accessorKey === 'string') {
+          // Format accessorKey to be more readable
+          return col.accessorKey
+            .replace(/([A-Z])/g, ' $1') // Add space before capital letters
+            .replace(/^./, str => str.toUpperCase()); // Capitalize first letter
         }
         
-        // For object headers (like those with sorting buttons)
-        // Use id as the fallback
         return col.id || '';
       });
     
@@ -952,38 +955,93 @@ function ListPageContent() {
       return columns
         .filter(col => col.id !== 'actions')
         .map(col => {
-          // Get the key to access the value (using id as a fallback)
-          const accessKey = col.id || '';
-            
+          // Get the accessor key to use
+          const accessKey = 'accessorKey' in col ? col.accessorKey : col.id;
+          
           if (!accessKey) return '';
           
           // Extract value using the accessor
           let value: any;
           
-          if (accessKey.includes('.')) {
-            // Handle nested properties
-            const keys = accessKey.split('.');
-            let currentObj: any = item;
-            
-            for (const k of keys) {
-              if (currentObj && typeof currentObj === 'object') {
-                currentObj = currentObj[k];
-              } else {
-                currentObj = undefined;
-                break;
+          if (typeof accessKey === 'string') {
+            if (accessKey.includes('.')) {
+              // Handle nested properties
+              const keys = accessKey.split('.');
+              let currentObj: any = item;
+              
+              for (const k of keys) {
+                if (currentObj && typeof currentObj === 'object') {
+                  currentObj = currentObj[k];
+                } else {
+                  currentObj = undefined;
+                  break;
+                }
               }
+              
+              value = currentObj;
+            } else {
+              // Handle direct properties
+              value = (item as any)[accessKey];
             }
-            
-            value = currentObj;
           } else {
-            // Handle direct properties
-            value = (item as any)[accessKey];
+            // For custom or computed columns that use a function accessor
+            value = '';
           }
           
-          // Format dates and special values
+          // Apply cell formatting if available
+          if ('cell' in col && typeof col.cell === 'function') {
+            try {
+              // Create a mock row object that has the getValue method
+              const mockRow = {
+                getValue: (key: string) => {
+                  // If the requested key matches our column, return the value
+                  if (key === accessKey) {
+                    return value;
+                  }
+                  // Otherwise, try to get it from the item
+                  return typeof key === 'string' ? (item as any)[key] : undefined;
+                },
+                original: item
+              };
+              
+              // Call the cell formatter with our mock row
+              const formattedCell = col.cell({ row: mockRow } as any);
+              
+              // If the result is a React element, try to extract text content
+              if (formattedCell && typeof formattedCell === 'object' && 'props' in formattedCell) {
+                // For basic elements, use textContent
+                if (typeof formattedCell.props.children === 'string') {
+                  value = formattedCell.props.children;
+                } else if (typeof value !== 'undefined') {
+                  // Keep the original value if we can't extract from the React element
+                  // but apply basic formatting for known types
+                  if (value instanceof Date) {
+                    value = formatDate(value);
+                  } else if (accessKey === 'budget' || 
+                             accessKey === 'estimatedBudget' || 
+                             accessKey === 'contractAmount') {
+                    // Format currency values
+                    value = new Intl.NumberFormat("en-US", {
+                      style: "currency",
+                      currency: "USD",
+                    }).format(parseFloat(value));
+                  }
+                }
+              } else if (formattedCell && typeof formattedCell !== 'object') {
+                // If we got a simple value (string, number), use that
+                value = formattedCell;
+              }
+            } catch (e) {
+              console.error('Error formatting cell for CSV export:', e);
+              // Fall back to the original value
+            }
+          }
+          
+          // Format special values
           if (value instanceof Date) {
             value = formatDate(value);
           } else if (typeof value === 'object' && value !== null) {
+            // Convert objects to string representation
             value = JSON.stringify(value);
           } else if (value === undefined || value === null) {
             value = '';
@@ -1008,7 +1066,7 @@ function ListPageContent() {
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.setAttribute('href', url);
-    link.setAttribute('download', `${formType}_${new Date().toISOString().split('T')[0]}.csv`);
+    link.setAttribute('download', `${formType}_export_${new Date().toISOString().split('T')[0]}.csv`);
     link.style.visibility = 'hidden';
     document.body.appendChild(link);
     link.click();
