@@ -37,7 +37,7 @@ const components = [
       "Creating a detailed plan for the procurement process, including identifying needs, determining the best approach, and establishing timelines.",
     icon: ClipboardList,
     variant: "success" as const,
-    iconColor: "emerald-600"
+    iconColor: "yellow-600"
   },
   {
     title: "Phase 3: Publication of Plan",

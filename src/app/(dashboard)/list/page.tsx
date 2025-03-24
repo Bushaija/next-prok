@@ -1019,7 +1019,7 @@ function ListPageContent() {
     <div className="p-4">
       <div>
         <h1 className="text-2xl font-bold text-blue-600">{formTitles[formType]} List</h1>
-        <p className="text-muted-foreground mt-1 text-blue-600">{formDescriptions[formType]}</p>
+        <p className="text-muted-foreground mt-1 text-gray-400">{formDescriptions[formType]}</p>
       </div>
       
       {isLoading() ? (
@@ -1067,36 +1067,36 @@ function ListPageContent() {
                 </Button>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button>
-                      <Plus className="mr-2 h-4 w-4 bg-blue-600 text-white rounded-full" /> Create New <ChevronDown className="ml-2 h-4 w-4" />
+                    <Button className="bg-blue-600 text-white hover:bg-blue-400">
+                      <Plus className="mr-2 h-4 w-4 text-white rounded-full" /> Create New <ChevronDown className="ml-2 h-4 w-4" />
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
-                    <DropdownMenuItem onClick={() => router.push(`/new/identification`)}>
+                    <DropdownMenuItem className="hover:bg-blue-50 cursor-pointer" onClick={() => router.push(`/new/identification`)}>
                       Identification
                     </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => router.push(`/new/planning`)}>
+                    <DropdownMenuItem className="hover:bg-blue-50 cursor-pointer" onClick={() => router.push(`/new/planning`)}>
                       Planning
                     </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => router.push(`/new/publication`)}>
+                    <DropdownMenuItem className="hover:bg-blue-50 cursor-pointer" onClick={() => router.push(`/new/publication`)}>
                       Publication
                     </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => router.push(`/new/publicationTender`)}>
+                    <DropdownMenuItem className="hover:bg-blue-50 cursor-pointer" onClick={() => router.push(`/new/publicationTender`)}>
                       Publication Tender
                     </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => router.push(`/new/openBid`)}>
+                    <DropdownMenuItem className="hover:bg-blue-50 cursor-pointer" onClick={() => router.push(`/new/openBid`)}>
                       Opening Bids
                     </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => router.push(`/new/bidEvaluation`)}>
+                    <DropdownMenuItem className="hover:bg-blue-50 cursor-pointer" onClick={() => router.push(`/new/bidEvaluation`)}>
                       Bid Evaluation
                     </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => router.push(`/new/contractSigning`)}>
+                    <DropdownMenuItem className="hover:bg-blue-50 cursor-pointer" onClick={() => router.push(`/new/contractSigning`)}>
                       Contract Signing
                     </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => router.push(`/new/contractManagement`)}>
+                    <DropdownMenuItem className="hover:bg-blue-50 cursor-pointer" onClick={() => router.push(`/new/contractManagement`)}>
                       Contract Management
                     </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => router.push(`/new/invoice`)}>
+                    <DropdownMenuItem className="hover:bg-blue-50 cursor-pointer" onClick={() => router.push(`/new/invoice`)}>
                       Invoice
                     </DropdownMenuItem>
                   </DropdownMenuContent>

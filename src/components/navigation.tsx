@@ -15,16 +15,8 @@ const routes = [
     label: "Home",
   },
   {
-    href: "#/process",
-    label: "Transactions",
-  },
-  {
-    href: "/accounts",
-    label: "Accounts",
-  },
-  {
-    href: "/categories",
-    label: "Categories",
+    href: "/list",
+    label: "All Phases",
   },
 ];
 

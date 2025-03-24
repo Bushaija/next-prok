@@ -344,9 +344,6 @@ export default function DynamicForm() {
     required: field.required
   }));
 
-  console.log("formType:: ", formType);
-  console.log("formFields:: ", formFields);
-
   return (
     <section className="max-w-screen-2xl mx-auto w-full pb-10 -mt-24 bg-white rounded-xl p-4">
     <div>
@@ -367,7 +364,7 @@ export default function DynamicForm() {
       {formFields.length > 0 ? (
         <>
           <div className="w-full">
-            <h1 className="flex items-start text-xl font-bold mb-4">{formTitle}</h1>
+            <h1 className="flex items-start text-blue-600 text-xl font-bold mb-4">{formTitle}</h1>
           </div>
           <Form fields={formFieldsForComponent} onSubmit={handleFormSubmit} />
           

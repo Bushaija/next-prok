@@ -140,7 +140,9 @@ export const Form: React.FC<FormProps> = ({ fields, onSubmit }) => {
             )}
           />
         ))}
-        <Button type="submit" className="col-span-full mt-4">Submit</Button>
+        <div className="flex justify-end">
+        </div>
+        <Button type="submit" className="flex bg-blue-600 hover:bg-blue-400 text-white mt-4">Submit</Button>
       </form>
     </ShadcnForm>
   );

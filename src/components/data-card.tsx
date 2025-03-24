@@ -86,7 +86,7 @@ export const DataCard = ({
         </div>
         <div>
           <CardTitle>
-            <h1 className="text-xl text-blue-500">{title}</h1>
+            <h1 className="text-xl text-blue-600 font-bold">{title}</h1>
           </CardTitle>
         </div>
         

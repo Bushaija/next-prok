@@ -190,7 +190,7 @@ export default function DetailsPage() {
   if (error) {
     return (
       <div className="container mx-auto py-10 px-4">
-        <Button variant="ghost" onClick={() => router.push("/list")} className="mb-6">
+        <Button variant="ghost" onClick={() => router.push("/list")} className="hover:bg-blue-50 text-white mb-6">
           <ArrowLeft className="h-5 w-5 mr-2" />
           Back to List
         </Button>
@@ -219,7 +219,7 @@ export default function DetailsPage() {
   if (!data) {
     return (
       <div className="container mx-auto py-10 px-4">
-        <Button variant="ghost" onClick={() => router.push("/list")} className="mb-6">
+        <Button variant="ghost" onClick={() => router.push("/list")} className="hover:bg-blue-50 text-white mb-6">
           <ArrowLeft className="h-5 w-5 mr-2" />
           Back to List
         </Button>
@@ -248,7 +248,7 @@ export default function DetailsPage() {
   if (formType === "identification") {
     return (
       <div className="container mx-auto py-10 px-4">
-        <Button variant="ghost" onClick={() => router.push("/list")} className="mb-6">
+        <Button variant="ghost" onClick={() => router.push("/list")} className="hover:bg-blue-50 text-white mb-6">
           <ArrowLeft className="h-5 w-5 mr-2" />
           Back to List
         </Button>
@@ -437,7 +437,7 @@ export default function DetailsPage() {
   // Default fallback for other form types (to be implemented)
   return (
     <div className="container mx-auto py-10 px-4">
-      <Button variant="ghost" onClick={() => router.push("/list")} className="mb-6">
+      <Button variant="ghost" onClick={() => router.push("/list")} className="hover:bg-blue-50 text-white mb-6">
         <ArrowLeft className="h-5 w-5 mr-2" />
         Back to List
       </Button>
