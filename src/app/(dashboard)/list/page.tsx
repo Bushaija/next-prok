@@ -3,7 +3,7 @@
 import { useState, useEffect, Suspense } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { ColumnDef } from "@tanstack/react-table"
-import { ArrowUpDown, Eye, Edit, Trash, ChevronDown, Plus, Download } from "lucide-react"
+import { ArrowUpDown, Eye, Edit, Trash, ChevronDown, Plus, Download, ArrowRight } from "lucide-react"
 
 import { DataTable } from "@/components/ui/data-table"
 import { Button } from "@/components/ui/button"
@@ -223,6 +223,47 @@ function ListPageContent() {
     }
   };
   
+  // Function to handle continuing the flow
+  const handleContinueFlow = (id: number, currentFormType: FormType) => {
+    // Determine the next form type in the flow
+    let nextFormType: FormType | null = null;
+    
+    switch (currentFormType) {
+      case "identification":
+        nextFormType = "planning";
+        break;
+      case "planning":
+        nextFormType = "publication";
+        break;
+      case "publication":
+        nextFormType = "publicationTender";
+        break;
+      case "publicationTender":
+        nextFormType = "openBid";
+        break;
+      case "openBid":
+        nextFormType = "bidEvaluation";
+        break;
+      case "bidEvaluation":
+        nextFormType = "contractSigning";
+        break;
+      case "contractSigning":
+        nextFormType = "contractManagement";
+        break;
+      case "contractManagement":
+        nextFormType = "invoice";
+        break;
+      // Invoice is the last step
+      case "invoice":
+        nextFormType = null;
+        break;
+    }
+    
+    if (nextFormType) {
+      router.push(`/new/${nextFormType}?parentId=${id}&parentType=${currentFormType}`);
+    }
+  };
+  
   // Define columns for each form type
   const identificationColumns: ColumnDef<ItemIdentification>[] = [
     {
@@ -308,6 +349,16 @@ function ListPageContent() {
             <Button variant="ghost" size="icon" onClick={() => openDeleteConfirm(id)}>
               <Trash className="h-4 w-4" />
             </Button>
+            {formType !== "invoice" && ( // Only show for non-invoice items (last in flow)
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                onClick={() => handleContinueFlow(id, formType)}
+                title={`Continue to next step in the flow`}
+              >
+                <ArrowRight className="h-4 w-4" />
+              </Button>
+            )}
           </div>
         )
       },
@@ -381,6 +432,16 @@ function ListPageContent() {
             <Button variant="ghost" size="icon" onClick={() => openDeleteConfirm(id)}>
               <Trash className="h-4 w-4" />
             </Button>
+            {formType !== "invoice" && ( // Only show for non-invoice items (last in flow)
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                onClick={() => handleContinueFlow(id, formType)}
+                title={`Continue to next step in the flow`}
+              >
+                <ArrowRight className="h-4 w-4" />
+              </Button>
+            )}
           </div>
         )
       },
@@ -438,6 +499,16 @@ function ListPageContent() {
             <Button variant="ghost" size="icon" onClick={() => openDeleteConfirm(id)}>
               <Trash className="h-4 w-4" />
             </Button>
+            {formType !== "invoice" && ( // Only show for non-invoice items (last in flow)
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                onClick={() => handleContinueFlow(id, formType)}
+                title={`Continue to next step in the flow`}
+              >
+                <ArrowRight className="h-4 w-4" />
+              </Button>
+            )}
           </div>
         )
       },
@@ -498,6 +569,16 @@ function ListPageContent() {
             <Button variant="ghost" size="icon" onClick={() => openDeleteConfirm(id)}>
               <Trash className="h-4 w-4" />
             </Button>
+            {formType !== "invoice" && ( // Only show for non-invoice items (last in flow)
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                onClick={() => handleContinueFlow(id, formType)}
+                title={`Continue to next step in the flow`}
+              >
+                <ArrowRight className="h-4 w-4" />
+              </Button>
+            )}
           </div>
         )
       },
@@ -553,6 +634,16 @@ function ListPageContent() {
             <Button variant="ghost" size="icon" onClick={() => openDeleteConfirm(id)}>
               <Trash className="h-4 w-4" />
             </Button>
+            {formType !== "invoice" && ( // Only show for non-invoice items (last in flow)
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                onClick={() => handleContinueFlow(id, formType)}
+                title={`Continue to next step in the flow`}
+              >
+                <ArrowRight className="h-4 w-4" />
+              </Button>
+            )}
           </div>
         )
       },
@@ -634,6 +725,16 @@ function ListPageContent() {
             <Button variant="ghost" size="icon" onClick={() => openDeleteConfirm(id)}>
               <Trash className="h-4 w-4" />
             </Button>
+            {formType !== "invoice" && ( // Only show for non-invoice items (last in flow)
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                onClick={() => handleContinueFlow(id, formType)}
+                title={`Continue to next step in the flow`}
+              >
+                <ArrowRight className="h-4 w-4" />
+              </Button>
+            )}
           </div>
         )
       },
@@ -714,6 +815,16 @@ function ListPageContent() {
             <Button variant="ghost" size="icon" onClick={() => openDeleteConfirm(id)}>
               <Trash className="h-4 w-4" />
             </Button>
+            {formType !== "invoice" && ( // Only show for non-invoice items (last in flow)
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                onClick={() => handleContinueFlow(id, formType)}
+                title={`Continue to next step in the flow`}
+              >
+                <ArrowRight className="h-4 w-4" />
+              </Button>
+            )}
           </div>
         )
       },
@@ -794,6 +905,16 @@ function ListPageContent() {
             <Button variant="ghost" size="icon" onClick={() => openDeleteConfirm(id)}>
               <Trash className="h-4 w-4" />
             </Button>
+            {formType !== "invoice" && ( // Only show for non-invoice items (last in flow)
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                onClick={() => handleContinueFlow(id, formType)}
+                title={`Continue to next step in the flow`}
+              >
+                <ArrowRight className="h-4 w-4" />
+              </Button>
+            )}
           </div>
         )
       },
@@ -870,6 +991,16 @@ function ListPageContent() {
             <Button variant="ghost" size="icon" onClick={() => openDeleteConfirm(id)}>
               <Trash className="h-4 w-4" />
             </Button>
+            {formType !== "invoice" && ( // Only show for non-invoice items (last in flow)
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                onClick={() => handleContinueFlow(id, formType)}
+                title={`Continue to next step in the flow`}
+              >
+                <ArrowRight className="h-4 w-4" />
+              </Button>
+            )}
           </div>
         )
       },

@@ -2,38 +2,11 @@ import { pgTable, serial, integer, text, pgEnum, timestamp, varchar } from "driz
 import { relations } from "drizzle-orm";
 import { z } from "zod";
 
-export const tableA = pgTable("table_a", {
-    id: serial("id").primaryKey(),
-    studentId: integer("student_id").notNull(),
-    test1: integer("test1"),
-    test2: integer("test2"),
-    test3: integer("test3"),
-    status: text("status").default("pending"),
-});
-
-export const tableB = pgTable("table_b", {
-    id: serial("id").primaryKey(),
-    studentId: integer("student_id").notNull(),
-    test1: integer("test1"),
-    test2: integer("test2"),    
-    test3: integer("test3"),
-    status: text("status").default("pending"),
-    dependsOn: integer("depends_on").references(() => tableA.id, { onDelete: "cascade" }),
-});
-
-export const tableC = pgTable("table_c", {
-    id: serial("id").primaryKey(),
-    studentId: integer("student_id").notNull(),
-    test1: integer("test1"),
-    test2: integer("test2"),
-    test3: integer("test3"),
-    status: text("status").default("pending"),
-    dependsOn: integer("depends_on").references(() => tableB.id, { onDelete: "cascade" }),
-});
 
 // Item Identification Table
 export const itemIdentifications = pgTable("item_identifications", {
   id: serial("id").primaryKey(),
+  procurementDivision: varchar("procurement_division", { length: 255 }),
   division: varchar("division", { length: 255 }),
   financialYear: integer("financial_year"),
   managerEmail: varchar("manager_email", { length: 255 }),
@@ -114,6 +87,86 @@ export const openingBids = pgTable("opening_bids", {
   publicationTenderId: integer("publication_tender_id").references(() => publicationTenders.id, { onDelete: "set null" }),
 });
 
+export const bidEvaluations = pgTable("bid_evaluations", {
+  id: serial("id").primaryKey(),
+  tenderTitle: varchar("tender_title", { length: 255 }),
+  bidEvaluationDate: timestamp("bid_evaluation_date"),
+  bidValidityStartingDate: timestamp("bid_validity_starting_date"),
+  bidValidityEndingDate: timestamp("bid_validity_ending_date"),
+  notificationDate: timestamp("notification_date"),
+  contractNegotiationDate: timestamp("contract_negotiation_date"),
+  contractAmount: integer("contract_amount"),
+  status: varchar("status", { length: 50 }).default("Pending"),
+  createdAt: timestamp("created_at", {mode: "string"}).defaultNow(),
+  updatedAt: timestamp("updated_at", {mode: "string"}).defaultNow(),
+  // Reference to opening bid
+  openingBidId: integer("opening_bid_id").references(() => openingBids.id, { onDelete: "set null" }),
+});
+
+// Contract Signing Table
+export const contractSignings = pgTable("contract_signings", {
+  id: serial("id").primaryKey(),
+  tenderTitle: varchar("tender_title", { length: 255 }),
+  draftOfTheContractDate: timestamp("draft_of_the_contract_date"),
+  reviewAndApprovalByTheLegalDate: timestamp("review_and_approval_by_the_legal_date"),
+  contractorBidderApprovalDate: timestamp("contractor_bidder_approval_date"),
+  contractorBidderNames: varchar("contractor_bidder_names", { length: 255 }),
+  contractorBidderEmail: varchar("contractor_bidder_email", { length: 255 }),
+  contractorBidderPhoneNumber: varchar("contractor_bidder_phone_number", { length: 50 }),
+  performanceGuaranteeValidityStartDate: timestamp("performance_guarantee_validity_start_date"),
+  performanceGuaranteeValidityEndDate: timestamp("performance_guarantee_validity_end_date"),
+  submissionOfPerformanceGuaranteeDate: timestamp("submission_of_performance_guarantee_date"),
+  approvalOfContractByTheMOJDate: timestamp("approval_of_contract_by_the_moj_date"),
+  approvalOfTheCBMDate: timestamp("approval_of_the_cbm_date"),
+  contractStartDate: timestamp("contract_start_date"),
+  contractEndDate: timestamp("contract_end_date"),
+  status: varchar("status", { length: 50 }).default("Pending"),
+  createdAt: timestamp("created_at", {mode: "string"}).defaultNow(),
+  updatedAt: timestamp("updated_at", {mode: "string"}).defaultNow(),
+  // Reference to bid evaluation
+  bidEvaluationId: integer("bid_evaluation_id").references(() => bidEvaluations.id, { onDelete: "set null" }),
+});
+
+// Contract Management Table
+export const contractManagements = pgTable("contract_managements", {
+  id: serial("id").primaryKey(),
+  tenderTitle: varchar("tender_title", { length: 255 }),
+  dateOfPurchaseOrderIssue: timestamp("date_of_purchase_order_issue"),
+  divisionIssuingAPurchaseOrder: varchar("division_issuing_a_purchase_order", { length: 255 }),
+  focalPerformanceFromTheProgram: varchar("focal_performance_from_the_program", { length: 255 }),
+  procurementStaff: varchar("procurement_staff", { length: 255 }),
+  performanceGuaranteeEndPeriod: timestamp("performance_guarantee_end_period"),
+  tenderExecutionStartDate: timestamp("tender_execution_start_date"),
+  tenderExecutionEndDate: timestamp("tender_execution_end_date"),
+  inspectionDoneBy: varchar("inspection_done_by", { length: 255 }),
+  inspectionList: varchar("inspection_list", { length: 50 }),
+  deliveryDate: timestamp("delivery_date"),
+  acceptanceDate: timestamp("acceptance_date"),
+  warrantyLiabilityStartDate: timestamp("warranty_liability_start_date"),
+  warrantyLiabilityEndDate: timestamp("warranty_liability_end_date"),
+  status: varchar("status", { length: 50 }).default("Pending"),
+  createdAt: timestamp("created_at", {mode: "string"}).defaultNow(),
+  updatedAt: timestamp("updated_at", {mode: "string"}).defaultNow(),
+  // Reference to contract signing
+  contractSigningId: integer("contract_signing_id").references(() => contractSignings.id, { onDelete: "set null" }),
+});
+
+// Invoice Table
+export const invoices = pgTable("invoices", {
+  id: serial("id").primaryKey(),
+  tenderTitle: varchar("tender_title", { length: 255 }),
+  invoiceSubmissionDate: timestamp("invoice_submission_date"),
+  invoiceReceivedByTheFinanceOfficeDate: timestamp("invoice_received_by_the_finance_office_date"),
+  requestedForPaymentDate: timestamp("requested_for_payment_date"),
+  dateOfInvoicePayment: timestamp("date_of_invoice_payment"),
+  status: varchar("status", { length: 50 }).default("Pending"),
+  createdAt: timestamp("created_at", {mode: "string"}).defaultNow(),
+  updatedAt: timestamp("updated_at", {mode: "string"}).defaultNow(),
+  // Reference to contract management
+  contractManagementId: integer("contract_management_id").references(() => contractManagements.id, { onDelete: "set null" }),
+});
+
+
 // Define Zod schemas for validation and type inference
 export const itemIdentificationSchema = z.object({
     id: z.number(),
@@ -182,6 +235,8 @@ export const publicationTenderSchema = z.object({
   updatedAt: z.coerce.date(),
   publicationId: z.number().optional().nullable(),
 });
+
+
 
 // Schema for creating a new item identification (without id and timestamps)
 export const newItemIdentificationSchema = itemIdentificationSchema.omit({ 
@@ -301,84 +356,6 @@ export const openingBidsRelations = relations(openingBids, ({ one }) => ({
 }));
 
 // Bid Evaluation Table
-export const bidEvaluations = pgTable("bid_evaluations", {
-  id: serial("id").primaryKey(),
-  tenderTitle: varchar("tender_title", { length: 255 }),
-  bidEvaluationDate: timestamp("bid_evaluation_date"),
-  bidValidityStartingDate: timestamp("bid_validity_starting_date"),
-  bidValidityEndingDate: timestamp("bid_validity_ending_date"),
-  notificationDate: timestamp("notification_date"),
-  contractNegotiationDate: timestamp("contract_negotiation_date"),
-  contractAmount: integer("contract_amount"),
-  status: varchar("status", { length: 50 }).default("Pending"),
-  createdAt: timestamp("created_at", {mode: "string"}).defaultNow(),
-  updatedAt: timestamp("updated_at", {mode: "string"}).defaultNow(),
-  // Reference to opening bid
-  openingBidId: integer("opening_bid_id").references(() => openingBids.id, { onDelete: "set null" }),
-});
-
-// Contract Signing Table
-export const contractSignings = pgTable("contract_signings", {
-  id: serial("id").primaryKey(),
-  tenderTitle: varchar("tender_title", { length: 255 }),
-  draftOfTheContractDate: timestamp("draft_of_the_contract_date"),
-  reviewAndApprovalByTheLegalDate: timestamp("review_and_approval_by_the_legal_date"),
-  contractorBidderApprovalDate: timestamp("contractor_bidder_approval_date"),
-  contractorBidderNames: varchar("contractor_bidder_names", { length: 255 }),
-  contractorBidderEmail: varchar("contractor_bidder_email", { length: 255 }),
-  contractorBidderPhoneNumber: varchar("contractor_bidder_phone_number", { length: 50 }),
-  performanceGuaranteeValidityStartDate: timestamp("performance_guarantee_validity_start_date"),
-  performanceGuaranteeValidityEndDate: timestamp("performance_guarantee_validity_end_date"),
-  submissionOfPerformanceGuaranteeDate: timestamp("submission_of_performance_guarantee_date"),
-  approvalOfContractByTheMOJDate: timestamp("approval_of_contract_by_the_moj_date"),
-  approvalOfTheCBMDate: timestamp("approval_of_the_cbm_date"),
-  contractStartDate: timestamp("contract_start_date"),
-  contractEndDate: timestamp("contract_end_date"),
-  status: varchar("status", { length: 50 }).default("Pending"),
-  createdAt: timestamp("created_at", {mode: "string"}).defaultNow(),
-  updatedAt: timestamp("updated_at", {mode: "string"}).defaultNow(),
-  // Reference to bid evaluation
-  bidEvaluationId: integer("bid_evaluation_id").references(() => bidEvaluations.id, { onDelete: "set null" }),
-});
-
-// Contract Management Table
-export const contractManagements = pgTable("contract_managements", {
-  id: serial("id").primaryKey(),
-  tenderTitle: varchar("tender_title", { length: 255 }),
-  dateOfPurchaseOrderIssue: timestamp("date_of_purchase_order_issue"),
-  divisionIssuingAPurchaseOrder: varchar("division_issuing_a_purchase_order", { length: 255 }),
-  focalPerformanceFromTheProgram: varchar("focal_performance_from_the_program", { length: 255 }),
-  procurementStaff: varchar("procurement_staff", { length: 255 }),
-  performanceGuaranteeEndPeriod: timestamp("performance_guarantee_end_period"),
-  tenderExecutionStartDate: timestamp("tender_execution_start_date"),
-  tenderExecutionEndDate: timestamp("tender_execution_end_date"),
-  inspectionDoneBy: varchar("inspection_done_by", { length: 255 }),
-  inspectionList: varchar("inspection_list", { length: 50 }),
-  deliveryDate: timestamp("delivery_date"),
-  acceptanceDate: timestamp("acceptance_date"),
-  warrantyLiabilityStartDate: timestamp("warranty_liability_start_date"),
-  warrantyLiabilityEndDate: timestamp("warranty_liability_end_date"),
-  status: varchar("status", { length: 50 }).default("Pending"),
-  createdAt: timestamp("created_at", {mode: "string"}).defaultNow(),
-  updatedAt: timestamp("updated_at", {mode: "string"}).defaultNow(),
-  // Reference to contract signing
-  contractSigningId: integer("contract_signing_id").references(() => contractSignings.id, { onDelete: "set null" }),
-});
-
-// Invoice Table
-export const invoices = pgTable("invoices", {
-  id: serial("id").primaryKey(),
-  tenderTitle: varchar("tender_title", { length: 255 }),
-  invoiceSubmissionDate: timestamp("invoice_submission_date"),
-  invoiceReceivedByTheFinanceOfficeDate: timestamp("invoice_received_by_the_finance_office_date"),
-  requestedForPaymentDate: timestamp("requested_for_payment_date"),
-  dateOfInvoicePayment: timestamp("date_of_invoice_payment"),
-  status: varchar("status", { length: 50 }).default("Pending"),
-  createdAt: timestamp("created_at", {mode: "string"}).defaultNow(),
-  updatedAt: timestamp("updated_at", {mode: "string"}).defaultNow(),
-  // Reference to contract management
-  contractManagementId: integer("contract_management_id").references(() => contractManagements.id, { onDelete: "set null" }),
-});
 
 // Bid Evaluation schema
 export const bidEvaluationSchema = z.object({

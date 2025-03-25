@@ -213,6 +213,95 @@ export default function EditFormPage() {
     router.back()
   }
 
+  // If we have the data, show related entity info
+  const renderRelationshipInfo = () => {
+    if (!data) return null;
+
+    // Find the parent relationship based on formType
+    let parentInfo: { type: FormType; id: number } | null = null;
+    
+    switch (formType) {
+      case 'planning':
+        if ('identificationId' in data && data.identificationId) {
+          parentInfo = {
+            type: 'identification' as FormType,
+            id: data.identificationId as number
+          };
+        }
+        break;
+      case 'publication':
+        if ('planningId' in data && data.planningId) {
+          parentInfo = {
+            type: 'planning' as FormType,
+            id: data.planningId as number
+          };
+        }
+        break;
+      case 'publicationTender':
+        if ('publicationId' in data && data.publicationId) {
+          parentInfo = {
+            type: 'publication' as FormType,
+            id: data.publicationId as number
+          };
+        }
+        break;
+      case 'openBid':
+        if ('publicationTenderId' in data && data.publicationTenderId) {
+          parentInfo = {
+            type: 'publicationTender' as FormType,
+            id: data.publicationTenderId as number
+          };
+        }
+        break;
+      case 'bidEvaluation':
+        if ('openingBidId' in data && data.openingBidId) {
+          parentInfo = {
+            type: 'openBid' as FormType,
+            id: data.openingBidId as number
+          };
+        }
+        break;
+      case 'contractSigning':
+        if ('bidEvaluationId' in data && data.bidEvaluationId) {
+          parentInfo = {
+            type: 'bidEvaluation' as FormType,
+            id: data.bidEvaluationId as number
+          };
+        }
+        break;
+      case 'contractManagement':
+        if ('contractSigningId' in data && data.contractSigningId) {
+          parentInfo = {
+            type: 'contractSigning' as FormType,
+            id: data.contractSigningId as number
+          };
+        }
+        break;
+      case 'invoice':
+        if ('contractManagementId' in data && data.contractManagementId) {
+          parentInfo = {
+            type: 'contractManagement' as FormType,
+            id: data.contractManagementId as number
+          };
+        }
+        break;
+    }
+
+    if (parentInfo) {
+      return (
+        <Alert className="mb-6 bg-blue-50 border-blue-200">
+          <AlertCircle className="h-4 w-4 text-blue-600" />
+          <AlertTitle className="text-blue-600">Related Information</AlertTitle>
+          <AlertDescription>
+            This {formTitles[formType].toLowerCase()} is linked to a {formTitles[parentInfo.type]} with ID: {parentInfo.id}
+          </AlertDescription>
+        </Alert>
+      );
+    }
+
+    return null;
+  };
+
   if (isLoading) {
     return <EditFormSkeleton formType={formType} />
   }
@@ -266,6 +355,8 @@ export default function EditFormPage() {
           </AlertDescription>
         </Alert>
       )}
+
+      {renderRelationshipInfo()}
 
       <Card>
         <CardHeader>
@@ -386,6 +477,7 @@ export default function EditFormPage() {
                 </Button>
                 <Button 
                   type="submit" 
+                  className="bg-blue-600 hover:bg-blue-200 text-white"
                   disabled={submitStatus === "loading"}
                 >
                   {submitStatus === "loading" ? "Saving..." : "Save Changes"}

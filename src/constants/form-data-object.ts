@@ -11,8 +11,16 @@ export interface FormProps {
   fields: FormField[];
   onSubmit: (data: Record<string, any>) => void;
 };
-
+// procurementDivision
 export const IdentificationFormFields: FormField[] = [
+  {
+    name: "procurementDivision",
+    title: "Procurement Division",
+    type: "text",
+    placeholder: "Enter procurement division",
+    options: ["Pending", "Approved", "Rejected"],
+    required: true,
+  },
   {
     name: "division",
     title: "Division",

@@ -2,7 +2,9 @@ import "./globals.css";
 import QueryProvider from "@/providers/query-provider";
 
 import { Toaster } from "@/components/ui/sonner";
-import { ClerkProvider } from "@clerk/nextjs";
+import { 
+  ClerkProvider,
+} from "@clerk/nextjs";
 
 export const metadata = {
   title: "Procurement Life Cycle Management",

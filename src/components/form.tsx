@@ -30,14 +30,17 @@ interface FormFieldType {
   placeholder?: string;
   options?: string[];
   required?: boolean;
+  initialValue?: any;
+  disabled?: boolean;
 }
 
 interface FormProps {
   fields: FormFieldType[];
-  onSubmit: (data: Record<string, any>) => void;
+  onSubmit: (data: Record<string, any>) => Promise<void>;
+  initialValues?: Record<string, any>;
 }
 
-export const Form: React.FC<FormProps> = ({ fields, onSubmit }) => {
+export const Form: React.FC<FormProps> = ({ fields, onSubmit, initialValues = {} }) => {
   // Create a dynamic schema based on the fields
   const formSchema = z.object(
     fields.reduce((acc, field) => {
@@ -73,15 +76,21 @@ export const Form: React.FC<FormProps> = ({ fields, onSubmit }) => {
 
   type FormSchema = z.infer<typeof formSchema>;
 
+  // Create defaultValues by merging field defaults with initialValues
+  const defaultValues = fields.reduce((acc, field) => {
+    // Use initialValue from field if specified, otherwise use from initialValues prop,
+    // otherwise use default empty value based on type
+    const value = field.initialValue !== undefined ? field.initialValue : 
+                  initialValues[field.name] !== undefined ? initialValues[field.name] : 
+                  field.type === "checkbox" ? false : "";
+    
+    return { ...acc, [field.name]: value };
+  }, {} as Record<string, any>);
+
   // Initialize the form
   const form = useForm<FormSchema>({
     resolver: zodResolver(formSchema),
-    defaultValues: fields.reduce((acc, field) => {
-      if (field.type === "checkbox") {
-        return { ...acc, [field.name]: false };
-      }
-      return { ...acc, [field.name]: "" };
-    }, {} as Record<string, any>),
+    defaultValues,
   });
 
   // Handle form submission
@@ -105,6 +114,7 @@ export const Form: React.FC<FormProps> = ({ fields, onSubmit }) => {
                     <Select
                       onValueChange={formField.onChange}
                       defaultValue={formField.value}
+                      disabled={field.disabled}
                     >
                       <SelectTrigger>
                         <SelectValue placeholder={field.placeholder || "Select an option"} />
@@ -121,17 +131,20 @@ export const Form: React.FC<FormProps> = ({ fields, onSubmit }) => {
                     <Textarea
                       placeholder={field.placeholder}
                       {...formField}
+                      disabled={field.disabled}
                     />
                   ) : field.type === "checkbox" ? (
                     <Checkbox
                       checked={formField.value as boolean}
                       onCheckedChange={formField.onChange}
+                      disabled={field.disabled}
                     />
                   ) : (
                     <Input
                       type={field.type}
                       placeholder={field.placeholder}
                       {...formField}
+                      disabled={field.disabled}
                     />
                   )}
                 </FormControl>
@@ -140,9 +153,7 @@ export const Form: React.FC<FormProps> = ({ fields, onSubmit }) => {
             )}
           />
         ))}
-        <div className="flex justify-end">
-        </div>
-        <Button type="submit" className="flex bg-blue-600 hover:bg-blue-400 text-white mt-4">Submit</Button>
+        <Button type="submit" className="col-span-full mt-4">Submit</Button>
       </form>
     </ShadcnForm>
   );
